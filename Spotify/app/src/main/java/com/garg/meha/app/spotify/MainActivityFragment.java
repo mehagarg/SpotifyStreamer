@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -30,13 +32,12 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * Fragment of main activity
  */
-public class MainActivityFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
+public class MainActivityFragment extends Fragment implements AdapterView.OnItemClickListener, EditText.OnEditorActionListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     private EditText mSearchText;
     private ListView mListView;
     private TextView mDummyTextView;
-    private ImageButton mImageButton;
 
     SpotifyListAdapter mSpotifyListAdapter;
 
@@ -80,9 +81,8 @@ public class MainActivityFragment extends Fragment implements AdapterView.OnItem
         mSearchText = (EditText) view.findViewById(R.id.search_artist_editText);
         mListView = (ListView) view.findViewById(R.id.artist_list_view);
         mDummyTextView = (TextView) view.findViewById(R.id.dummyText);
-        mImageButton = (ImageButton) view.findViewById(R.id.searchButton);
-        mImageButton.setOnClickListener(this);
 
+        mSearchText.setOnEditorActionListener(this);
         mListView.setOnItemClickListener(this);
         return view;
     }
@@ -94,9 +94,13 @@ public class MainActivityFragment extends Fragment implements AdapterView.OnItem
     }
 
     @Override
-    public void onClick(View v) {
-        String artistQueryParam = mSearchText.getText().toString();
-        startSpotifyService(artistQueryParam);
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            String artistQueryParam = mSearchText.getText().toString();
+            startSpotifyService(artistQueryParam);
+            return true;
+        }
+        return false;
     }
 
     /**
