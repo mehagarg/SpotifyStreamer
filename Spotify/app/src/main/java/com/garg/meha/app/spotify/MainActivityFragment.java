@@ -2,10 +2,8 @@ package com.garg.meha.app.spotify;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,9 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +28,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * Fragment of main activity
  */
-public class MainActivityFragment extends Fragment implements AdapterView.OnItemClickListener, EditText.OnEditorActionListener {
+public class MainActivityFragment extends Fragment implements EditText.OnEditorActionListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     private EditText mSearchText;
@@ -83,14 +79,7 @@ public class MainActivityFragment extends Fragment implements AdapterView.OnItem
         mDummyTextView = (TextView) view.findViewById(R.id.dummyText);
 
         mSearchText.setOnEditorActionListener(this);
-        mListView.setOnItemClickListener(this);
         return view;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(getActivity(), Top10TrackActivity.class);
-        startActivity(intent);
     }
 
     @Override

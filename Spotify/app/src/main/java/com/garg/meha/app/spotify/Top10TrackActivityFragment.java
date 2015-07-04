@@ -32,7 +32,7 @@ public class Top10TrackActivityFragment extends Fragment {
                 "Justin Timberlake", "Rihanna", "Adele", "John Lennon", "SP Balasubramaniam", "Jennifer Lopez", "Justin Timberlake"};
         ArrayList<String> artist = new ArrayList<>(Arrays.asList(artistsList));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.artist_top10_list_item, R.id.artistTV, artist);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.artist_top10_list_item, R.id.artistTV_top10, artist);
         mListView.setAdapter(adapter);
 
         return view;
