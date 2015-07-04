@@ -1,10 +1,10 @@
 package com.garg.meha.app.spotify;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,34 +13,32 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Image;
+
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment of main activity
  */
-public class MainActivityFragment extends Fragment implements SearchView.OnQueryTextListener, View.OnFocusChangeListener, AdapterView.OnItemClickListener {
+public class MainActivityFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
-    private SearchView mSearchView;
+    private EditText mSearchText;
     private ListView mListView;
+    private TextView mDummyTextView;
+    private ImageButton mImageButton;
 
-
-    ArrayAdapter<String> adapter;
+    SpotifyListAdapter mSpotifyListAdapter;
 
     public MainActivityFragment() {
     }
@@ -62,15 +60,16 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
         int id = item.getItemId();
         switch (id) {
             case R.id.action_start_spotify:
-                startSpotifyService();
+                // think of something else
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void startSpotifyService() {
+    // Performing Spotify api background service task
+    private void startSpotifyService(String artistQueryParam) {
         FetchArtistTask fetchArtistTask = new FetchArtistTask();
-        fetchArtistTask.execute();
+        fetchArtistTask.execute(artistQueryParam);
     }
 
     @Override
@@ -78,48 +77,14 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        mSearchView = (SearchView) view.findViewById(R.id.search_artist);
+        mSearchText = (EditText) view.findViewById(R.id.search_artist_editText);
         mListView = (ListView) view.findViewById(R.id.artist_list_view);
+        mDummyTextView = (TextView) view.findViewById(R.id.dummyText);
+        mImageButton = (ImageButton) view.findViewById(R.id.searchButton);
+        mImageButton.setOnClickListener(this);
 
-        String[] artistsList = {"Rihanna", "Adele", "John Lennon", "SP Balasubramaniam", "Jennifer Lopez",
-                "Justin Timberlake", "Rihanna", "Adele", "John Lennon", "SP Balasubramaniam", "Jennifer Lopez", "Justin Timberlake"};
-
-        ArrayList<String> artist = new ArrayList<>(Arrays.asList(artistsList));
-
-
-        adapter = new ArrayAdapter<>(getActivity(), R.layout.artist_search_result, R.id.artistTV, R.id.artist_Image, artist);
-        mListView.setAdapter(adapter);
         mListView.setOnItemClickListener(this);
-        mListView.setTextFilterEnabled(true);
-        setUpSearchView();
         return view;
-    }
-
-    private void setUpSearchView() {
-        mSearchView.setIconifiedByDefault(true);
-        mSearchView.setOnQueryTextFocusChangeListener(this);
-        mSearchView.setSubmitButtonEnabled(true);
-        mSearchView.setQueryHint(getActivity().getResources().getString(R.string.search_artist));
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        if (TextUtils.isEmpty(query)) {
-            mListView.clearTextFilter();
-        } else {
-            mListView.setFilterText(query.toString());
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
-    }
-
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-
     }
 
     @Override
@@ -128,43 +93,54 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
         startActivity(intent);
     }
 
-    public class FetchArtistTask extends AsyncTask<Void, Void, List<Artist>> {
+    @Override
+    public void onClick(View v) {
+        String artistQueryParam = mSearchText.getText().toString();
+        startSpotifyService(artistQueryParam);
+    }
+
+    /**
+     * FetchArtistTask extends Background AysncTask to download data from Spotify Wrapper class
+     */
+    public class FetchArtistTask extends AsyncTask<String, Void, List<Artist>> {
+        private ProgressDialog dialog = null;
+
         @Override
-        protected List<Artist> doInBackground(Void... params) {
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(getActivity());
+            dialog.setMessage("Downloading albums ...");
+            dialog.show();
+        }
+
+        @Override
+        protected List<Artist> doInBackground(String... params) {
             //        Connect to the Spotify api with the wrapper
             SpotifyApi api = new SpotifyApi();
 
             //        Create a SpotifyService object that we can use to get desired data.
             SpotifyService spotify = api.getService();
 
-            ArtistsPager results = spotify.searchArtists("Beyonce");
+            ArtistsPager results = spotify.searchArtists(params[0]);
             List<Artist> artists = results.artists.items;
-            int imageHeight = 64, imageWidth = 64;
-            String url = null;
-            for (int i = 0; i < artists.size(); i++) {
-                Artist artist = artists.get(i);
-
-                for (int j = 0; j < artist.images.size(); j++) {
-                    if ((imageHeight == artist.images.get(j).height)
-                            && (imageWidth == artist.images.get(j).width)) {
-                        url = artist.images.get(j).url;
-                    }
-                }
-
-                Log.i(LOG_TAG, i + " " + artist.name + " " + url);
-            }
-
 
             return artists;
         }
 
         @Override
         protected void onPostExecute(List<Artist> artists) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            if (artists == null) {
+                Toast.makeText(getActivity(), "Cannot match the artist's name. Please try again", Toast.LENGTH_LONG).show();
+            }
             if (artists != null) {
-                adapter.clear();
-                for (int i = 0; i < artists.size(); i++) {
-                    adapter.add(artists.get(i).name);
-                }
+                mDummyTextView.setVisibility(View.GONE);
+                mListView.setVisibility(View.VISIBLE);
+                mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), artists);
+                mListView.setAdapter(mSpotifyListAdapter);
             }
         }
     }

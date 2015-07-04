@@ -12,7 +12,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artists;
+import kaaes.spotify.webapi.android.models.Artist;
 
 /**
  * Created by meha on 7/4/15.
@@ -20,8 +20,9 @@ import kaaes.spotify.webapi.android.models.Artists;
 public class SpotifyListAdapter extends BaseAdapter {
 
     private Activity context;
-    private List<Artists> artists;
-    public SpotifyListAdapter(Activity context, int resourceId, List<Artists> artists) {
+    private List<Artist> artists;
+
+    public SpotifyListAdapter(Activity context, List<Artist> artists) {
         this.context = context;
         this.artists = artists;
     }
@@ -32,7 +33,7 @@ public class SpotifyListAdapter extends BaseAdapter {
     }
 
     @Override
-    public Artists getItem(int position) {
+    public Artist getItem(int position) {
         return artists.get(position);
     }
 
@@ -47,14 +48,24 @@ public class SpotifyListAdapter extends BaseAdapter {
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.artist_search_result, null);
+            convertView = mInflater.inflate(R.layout.artist_search_list_item, null);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        Picasso.with(context).load("http://i.imgur.com/DvpvklR.png").into(holder.image);
-        holder.artistListItemText.setText(artists.get(position).getClass().getName());
+
+        int imageHeight = 64, imageWidth = 64;
+        String url = null;
+        Artist artist = artists.get(position);
+        holder.artistListItemText.setText(artist.name);
+        for (int j = 0; j < artist.images.size(); j++) {
+                if ((imageHeight == artist.images.get(j).height)
+                        && (imageWidth == artist.images.get(j).width)) {
+                    url = artist.images.get(j).url;
+                    Picasso.with(context).load(url).into(holder.image);
+                }
+            }
 
         return convertView;
     }
