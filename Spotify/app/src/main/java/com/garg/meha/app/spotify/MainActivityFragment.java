@@ -1,5 +1,6 @@
 package com.garg.meha.app.spotify;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -23,6 +24,7 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Tracks;
 
 
 /**
@@ -30,6 +32,12 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment implements EditText.OnEditorActionListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+
+    OnAlbumSelectedListener mCallback;
+
+    public interface OnAlbumSelectedListener {
+        public void onAlbumSelected(String results);
+    }
 
     private EditText mSearchText;
     private ListView mListView;
@@ -44,6 +52,18 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (OnAlbumSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnAlbumSelectedListener");
+        }
     }
 
     @Override
@@ -132,7 +152,7 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
             if (artists != null) {
                 mDummyTextView.setVisibility(View.GONE);
                 mListView.setVisibility(View.VISIBLE);
-                mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), artists);
+                mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), artists, mCallback);
                 mListView.setAdapter(mSpotifyListAdapter);
             }
         }

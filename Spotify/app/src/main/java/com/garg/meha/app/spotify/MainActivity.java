@@ -1,14 +1,15 @@
 package com.garg.meha.app.spotify;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity  implements MainActivityFragment.OnAlbumSelectedListener{
 
+    private static final String SPOTIFYID = "spotifyId";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,5 +40,12 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onAlbumSelected(String spotifyId) {
+        Intent intent = new Intent(this, Top10TrackActivity.class);
+        intent.putExtra(SPOTIFYID, spotifyId);
+        startActivity(intent);
     }
 }
