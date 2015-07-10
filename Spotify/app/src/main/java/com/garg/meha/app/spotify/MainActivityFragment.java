@@ -5,6 +5,8 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,7 +26,6 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Tracks;
 
 
 /**
@@ -34,9 +35,10 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     OnAlbumSelectedListener mCallback;
+    Parcelable state;
 
     public interface OnAlbumSelectedListener {
-        public void onAlbumSelected(String results);
+        void onAlbumSelected(String results);
     }
 
     private EditText mSearchText;
@@ -45,6 +47,16 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
 
     SpotifyListAdapter mSpotifyListAdapter;
 
+    private List<Artist> artistData;
+
+    public List<Artist> getArtistData() {
+        return artistData;
+    }
+
+    public void setArtistData(List<Artist> artistData) {
+        this.artistData = artistData;
+    }
+
     public MainActivityFragment() {
     }
 
@@ -52,6 +64,7 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        setRetainInstance(true);
     }
 
     @Override
@@ -64,6 +77,13 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
             throw new ClassCastException(activity.toString()
                     + " must implement OnAlbumSelectedListener");
         }
+    }
+
+    @Override
+    public void onPause() {
+        state = mListView.onSaveInstanceState();
+        super.onPause();
+
     }
 
     @Override
@@ -103,6 +123,14 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (getArtistData()!=null) {
+            mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), getArtistData(), mCallback);
+        }
+    }
+
+    @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_SEARCH) {
             String artistQueryParam = mSearchText.getText().toString();
@@ -110,6 +138,13 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("text", mSearchText.getText().toString());
+        outState.putParcelable("listView.state", mListView.onSaveInstanceState());
     }
 
     /**
@@ -151,6 +186,7 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
             }
             if (artists != null) {
                 mDummyTextView.setVisibility(View.GONE);
+                setArtistData(artists);
                 mListView.setVisibility(View.VISIBLE);
                 mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), artists, mCallback);
                 mListView.setAdapter(mSpotifyListAdapter);
