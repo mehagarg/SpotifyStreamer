@@ -6,4 +6,8 @@
     <string name="title_activity_top10_track">Top 10 Tracks</string>
     <string name="action_refresh">Start Spotify Service</string>
     <string name="dummyText">Please search for your favorite artist!</string>
+
+    <string name="title_activity_play_mylist_track">PlayMylistTrack</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

@@ -42,7 +42,6 @@ public class Top10ListAdapter extends BaseAdapter {
         this.results = results;
     }
 
-
     @Override
     public int getCount() {
         return results.tracks.size();
@@ -84,10 +83,10 @@ public class Top10ListAdapter extends BaseAdapter {
         holder.top10_album.setText(track.name);
         holder.top10_track.setText(track.album.name);
         for (int j = 0; j < track.album.images.size(); j++) {
-            if ((imageHeight == track.album.images.get(j).height)
-                    && (imageWidth == track.album.images.get(j).height)) {
+            if ((track.album.images.get(0).height!=imageHeight)
+                    && (track.album.images.get(0).width!=imageWidth)) {
                 url = track.album.images.get(0).url;
-                Picasso.with(context).load(url).into(holder.image);
+                Picasso.with(context).load(url).resize(imageWidth, imageHeight).into(holder.image);
             }
         }
 

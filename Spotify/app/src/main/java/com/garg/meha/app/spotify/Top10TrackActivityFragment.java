@@ -41,8 +41,6 @@ public class Top10TrackActivityFragment extends Fragment {
     public Top10TrackActivityFragment() {
     }
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -54,13 +52,6 @@ public class Top10TrackActivityFragment extends Fragment {
         Intent intent = getActivity().getIntent();
         String spotifyId = intent.getStringExtra(SPOTIFYID);
         startSpotifyServiceForAlbum(spotifyId);
-//        if (savedInstanceState != null) {
-//            String spotifyArg = savedInstanceState.getString(SPOTIFYID);
-//            startSpotifyServiceForAlbum(spotifyArg);
-//        }
-
-//        mListView.setAdapter(adapter);
-
         return view;
     }
 
@@ -89,22 +80,6 @@ public class Top10TrackActivityFragment extends Fragment {
             Map<String, Object> map = new HashMap<>();
             map.put("country", "US");
             Tracks tracks = spotify.getArtistTopTrack(params[0], map);
-
-//            , new Callback<Tracks>() {
-//                @Override
-//                public void success(Tracks results, Response response) {
-//
-//
-////                    Log.v("Spotify", "success");
-////                    ArrayList<Track> tracks = new ArrayList<Track>(results.tracks);
-////                    Log.d("String of Track", tracks.toString());
-////                    for (int i = 0; i < results.tracks.size(); i++) {
-////                        Log.d("Results from Top 10", tracks.get(i).album.name);
-////                        Log.d("Results from Tracks", tracks.get(i).name);
-////                        Log.d("Results from Images Url", tracks.get(i).album.images.get(0).url);
-////                    }
-//                }
-
             return tracks;
         }
 
