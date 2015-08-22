@@ -3,23 +3,22 @@ package com.garg.meha.app.spotify;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -33,10 +32,13 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment implements EditText.OnEditorActionListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+    public static final String searchField = "SEARCH_FIELD";
 
     OnAlbumSelectedListener mCallback;
-    Parcelable state;
 
+    /**
+     * interface
+     */
     public interface OnAlbumSelectedListener {
         void onAlbumSelected(String results);
     }
@@ -45,17 +47,9 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     private ListView mListView;
     private TextView mDummyTextView;
 
-    SpotifyListAdapter mSpotifyListAdapter;
+    private SpotifyListAdapter mSpotifyListAdapter;
+    private List<Artist> artistData = new ArrayList<>();
 
-    private List<Artist> artistData;
-
-    public List<Artist> getArtistData() {
-        return artistData;
-    }
-
-    public void setArtistData(List<Artist> artistData) {
-        this.artistData = artistData;
-    }
 
     public MainActivityFragment() {
     }
@@ -63,7 +57,6 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         setRetainInstance(true);
     }
 
@@ -79,32 +72,13 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
         }
     }
 
-    @Override
-    public void onPause() {
-        state = mListView.onSaveInstanceState();
-        super.onPause();
-
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_artist_list, menu);
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_start_spotify:
-                // think of something else
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     // Performing Spotify api background service task
     private void startSpotifyService(String artistQueryParam) {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
         FetchArtistTask fetchArtistTask = new FetchArtistTask();
         fetchArtistTask.execute(artistQueryParam);
     }
@@ -117,17 +91,10 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
         mSearchText = (EditText) view.findViewById(R.id.search_artist_editText);
         mListView = (ListView) view.findViewById(R.id.artist_list_view);
         mDummyTextView = (TextView) view.findViewById(R.id.dummyText);
-
+        mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), artistData, mCallback);
+        mListView.setAdapter(mSpotifyListAdapter);
         mSearchText.setOnEditorActionListener(this);
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getArtistData()!=null) {
-            mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), getArtistData(), mCallback);
-        }
     }
 
     @Override
@@ -138,13 +105,6 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("text", mSearchText.getText().toString());
-        outState.putParcelable("listView.state", mListView.onSaveInstanceState());
     }
 
     /**
@@ -177,20 +137,37 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
 
         @Override
         protected void onPostExecute(List<Artist> artists) {
+            // hide the progress dialog
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
 
-            if (artists == null) {
-                Toast.makeText(getActivity(), "Cannot match the artist's name. Please try again", Toast.LENGTH_LONG).show();
+            // if search results are empty, display this toast
+            if (artists == null || artists.isEmpty()) {
+                Toast.makeText(getActivity(), "Cannot find the artist! Please try with a different name", Toast.LENGTH_LONG).show();
             }
-            if (artists != null) {
+            // set the adapter with the new data received
+            if (artists != null || !artists.isEmpty()) {
+                artistData.clear();
+                artistData.addAll(artists);
+                mSpotifyListAdapter.notifyDataSetChanged();
                 mDummyTextView.setVisibility(View.GONE);
-                setArtistData(artists);
                 mListView.setVisibility(View.VISIBLE);
-                mSpotifyListAdapter = new SpotifyListAdapter(getActivity(), artists, mCallback);
-                mListView.setAdapter(mSpotifyListAdapter);
             }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(searchField, mSearchText.getText().toString());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            startSpotifyService(savedInstanceState.getString(searchField));
+        }
+        super.onViewStateRestored(savedInstanceState);
     }
 }
