@@ -1,32 +1,21 @@
 package com.garg.meha.app.spotify;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.util.Log;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.garg.meha.app.spotify.model.ArtistDto;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Track;
-import kaaes.spotify.webapi.android.models.Tracks;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * Created by meha on 7/4/15.
@@ -69,19 +58,13 @@ public class SpotifyListAdapter extends BaseAdapter {
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
 
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mCallBack.onAlbumSelected(spotifyID);
-                }
-            });
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         int imageHeight = 64, imageWidth = 64;
         String url = null;
-        Artist artist = artists.get(position);
+        final Artist artist = artists.get(position);
         holder.artistListItemText.setText(artist.name);
         for (int j = 0; j < artist.images.size(); j++) {
             if ((artist.images.get(0).height!=imageHeight)
@@ -90,6 +73,19 @@ public class SpotifyListAdapter extends BaseAdapter {
                 Picasso.with(context).load(url).resize(imageWidth, imageHeight).into(holder.image);
             }
         }
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallBack.onAlbumSelected(spotifyID);
+                ArtistDto artistName = new ArtistDto(artist.name);
+
+                SharedPreferences preferences = context.getSharedPreferences("artistName", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("artistName", artist.name.toString());
+                editor.commit();
+            }
+        });
         spotifyID = artist.id;
         return convertView;
     }
