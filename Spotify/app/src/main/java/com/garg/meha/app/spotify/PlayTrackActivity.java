@@ -48,7 +48,7 @@ public class PlayTrackActivity extends AppCompatActivity {
         initLayout();
         setArtistName();
         setTractDetails();
-
+        updateSeekbar();
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,7 +80,7 @@ public class PlayTrackActivity extends AppCompatActivity {
 
     private void updateSeekbar() {
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
-        seekBar.postDelayed(run, 100);
+        seekBar.postDelayed(run, 1000);
     }
 
     private void playMedia(String previewURL) {
