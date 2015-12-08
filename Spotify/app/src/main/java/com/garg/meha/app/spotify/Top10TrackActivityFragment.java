@@ -78,7 +78,7 @@ public class Top10TrackActivityFragment extends Fragment {
             //        Create a SpotifyService object that we can use to get desired data.
             SpotifyService spotify = api.getService();
             Map<String, Object> map = new HashMap<>();
-            map.put("country", "US");
+            map.put("country", "SE");
             Tracks tracks = spotify.getArtistTopTrack(params[0], map);
             return tracks;
         }

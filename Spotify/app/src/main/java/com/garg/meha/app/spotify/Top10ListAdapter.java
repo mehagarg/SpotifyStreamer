@@ -2,8 +2,6 @@ package com.garg.meha.app.spotify;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +9,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.garg.meha.app.spotify.model.ArtistDto;
 import com.garg.meha.app.spotify.model.TrackDto;
 import com.squareup.picasso.Picasso;
 

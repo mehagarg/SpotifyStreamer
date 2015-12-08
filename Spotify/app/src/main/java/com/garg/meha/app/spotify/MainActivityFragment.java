@@ -32,7 +32,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment implements EditText.OnEditorActionListener {
     public static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-    public static final String searchField = "SEARCH_FIELD";
+    public static final String searchField = "SEARCH_ARTIST";
 
     OnAlbumSelectedListener mCallback;
 
@@ -47,6 +47,8 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     private ListView mListView;
     private TextView mDummyTextView;
 
+    private String searchArtistField;
+
     private SpotifyListAdapter mSpotifyListAdapter;
     private List<Artist> artistData = new ArrayList<>();
 
@@ -57,7 +59,16 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setRetainInstance(true);
+    }
+
+    public String getSearchText() {
+        return this.searchArtistField;
+    }
+
+    public void setSearchText(String searchArtistField) {
+        this.searchArtistField = searchArtistField;
     }
 
     @Override
@@ -100,8 +111,9 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-            String artistQueryParam = mSearchText.getText().toString();
-            startSpotifyService(artistQueryParam);
+            searchArtistField = mSearchText.getText().toString();
+            setSearchText(searchArtistField);
+            startSpotifyService(searchArtistField);
             return true;
         }
         return false;
@@ -169,5 +181,19 @@ public class MainActivityFragment extends Fragment implements EditText.OnEditorA
             startSpotifyService(savedInstanceState.getString(searchField));
         }
         super.onViewStateRestored(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getSearchText() != null) {
+            startSpotifyService(getSearchText());
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
     }
 }

@@ -2,6 +2,7 @@ package com.garg.meha.app.spotify;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.garg.meha.app.spotify.model.ArtistDto;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -77,8 +77,7 @@ public class SpotifyListAdapter extends BaseAdapter {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallBack.onAlbumSelected(spotifyID);
-                ArtistDto artistName = new ArtistDto(artist.name);
+                mCallBack.onAlbumSelected(artist.id);
 
                 SharedPreferences preferences = context.getSharedPreferences("artistName", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
